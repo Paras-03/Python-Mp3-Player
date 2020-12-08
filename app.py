@@ -3,17 +3,16 @@ import os
 from time import *
 import re
 from tkinter import *
-from tkinter import filedialog
+from tkinter import messagebox
 from mutagen.mp3 import MP3
 from threading import Thread
-from frames import help, play_list, about
+from frames import help, play_list, about, play_from_list, number
 
-
-PATH1 = "C:\\Users\\paras\\Desktop\\Songs\\"
-PATH = "E:\\songs\\Album\\"
+PATH = "PATH TO MP FILES\\"
 #files = filedialog.askopenfilenames()
 song = os.listdir(PATH)
 songs = []
+b=0
 a = 0
 
 current = 0
@@ -33,21 +32,36 @@ stoped = False
 mute = False
 
 def threadmethod():
-  # PERFORMS PLAY, STOP, PAUSE, NEXT, FORWARD etc.
-  # RETURN None
-  
     elapsed_time = 0
     volume = 50
-    global status, player, is_playing, songs, size
-    global instance, current, stoped, total, song, mute
+    global status, player, is_playing, songs, size, number
+    global instance, current, stoped, total, song, mute, b
 
     while True:
 
-        if status == "Unmute":
+        if status == "Play_from":
+            try:
+                number = int(number[b])-1
+                b=b+1
+                for x in songs:
+                    if number == x['no']:
+                        current = number
+                        status = "Play"
+                        break
+                else:
+                    messagebox.showinfo(message="Invalid Song number", icon="error")
+                    current=0
+                    status = "Play"
+
+            except (ValueError):
+                messagebox.showinfo(message="Enter the song number", icon="error")
+                quit()
+
+        elif status == "Unmute":
             mute = False
             player.audio_set_volume(volume)
 
-        if status == "Resume":
+        elif status == "Resume":
             is_playing = True
             status = ""
             player.pause()
@@ -140,12 +154,9 @@ def threadmethod():
         sleep(0.1)
 
 def change():
-  # CHANGES THE NAME OF SONG, SINGER & ALBUM.
-  # RETURN None
-  
-  global root, instance, song
+    global root, instance, song
 
-    can = Canvas(root, height=110, width=380, bg="white")
+    can = Canvas(root, height=110, width=380, bg="black")
     can.place(x=11, y=55)
 
     if is_playing:
@@ -176,21 +187,25 @@ def change():
 
     _3 = Label(can, text=singer, font=("Arabia", 16, "bold"), bg="white", fg="black")
     _3.place(x=5, y=75)
+
     return
 
 def join(operation):
-  # CHANGES THE GLOBAL VARIABLES.
-  # RETURN None
-  
-    global exist, status, is_playing, stoped, mute
+    global exist, status, is_playing, stoped, mute, songs
 
     if exist == False:
+        if operation == "Play_from":
+            play_from_list(songs)
+            status = operation
+
+        else:
+            status = operation
         a = Thread(target=threadmethod)
+        print("Started")
         a.start()
         exist = True
         a.join(0.1)
         is_playing = True
-        status = operation
 
     else:
         if mute:
@@ -203,28 +218,32 @@ def join(operation):
            if operation == "Play":
                status = "Resume"
 
+        elif operation == "Play_from":
+            song = play_from_list()
+            status = operation
+
         else:
             status = operation
  
 def main():
-  # RETURN None
-
     global root
     global player, songs, size, current
 
     root = Tk()
+    root.title("MP3 PLAYER")
     root.geometry("491x260")
     root.config(bg="black")
+    root.resizable(width = False, height = False)
     
     change()
-    __0 = Button(root, text="Playlist", width=13, bd=10, font=('', 11, ''), bg="black", fg="white", command=lambda:play_list(songs))
+    __0 = Button(root, text="Playlist", width=10, bd=10, font=('', 11, ''), bg="black", fg="white", command=lambda:play_list(songs))
     __0.place(x=14, y=4)
 
-    __1 = Button(root, text="Help", width=13, bd=10, font=('', 11, ''), bg="black", fg="white", command=lambda:help())
-    __1.place(x=177, y=4)
+    __1 = Button(root, text="Help", width=10, bd=10, font=('', 11, ''), bg="black", fg="white", command=lambda:help())
+    __1.place(x=140, y=4)
 
-    __2 = Button(root, text="About", width=13, bd=10, font=('', 11, ''), bg="black", fg="white", command=lambda:about())
-    __2.place(x=340, y=4)
+    __2 = Button(root, text="About", width=10, bd=10, font=('', 11, ''), bg="black", fg="white", command=lambda:about())
+    __2.place(x=266, y=4)
 
     can1 = Canvas(root, height=70, width=375, bg="black")
     can1.place(x=10, y=180)
@@ -244,20 +263,23 @@ def main():
     _5 = Button(can1, text="NEXT", height=3, width=7, bg="black", bd=10, fg="white", command=lambda:join("Next"))
     _5.place(x=300, y=1)
 
-    can = Canvas(root, height=200, width=80, bg="black")
-    can.place(x=400, y=52)
+    can = Canvas(root, height=250, width=80, bg="black")
+    can.place(x=400, y=4)
 
+    __1 = Button(can, text="Play from\nPlaylist", height=3, width=8, bg="black", bd=7, fg="white", command=lambda:join("Play_from"))
+    __1.place(x=5,y=5)
     _6 = Button(can, text="Volume\nIncrease", height=3, width=8, bg="black", bd=7, fg="white", command=lambda:join("Increase"))
-    _6.place(x=5, y=3)
+    _6.place(x=5, y=70)
     
-    _7 = Button(can, text="Mute", height=3, width=8, bg="black", bd=7, fg="white", command=lambda:join("Mute"))
-    _7.place(x=5, y=67)
+    _7 = Button(can, text="Mute", height=2, width=8, bg="black", bd=7, fg="white", command=lambda:join("Mute"))
+    _7.place(x=5, y=135)
 
     _7 = Button(can, text="Volume\nDecrease", height=3, width=8, bg="black", bd=7, fg="white", command=lambda:join("Decrease"))
-    _7.place(x=5, y=135)
+    _7.place(x=5, y=185)
 
     root.mainloop()
 
 m = Thread(target=main)
 m.start()
 m.join()
+
