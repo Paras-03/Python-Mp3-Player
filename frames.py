@@ -6,7 +6,7 @@ box = Listbox
 number = []
 
 def help():
-    PATH = r"##Enter your path here"
+    PATH = r"//Enter your path here//"
     h1 = " To be able to play songs : "
     step1 = "Step-1]   You can only play files \nwith .mp3 extension."
 
