@@ -1,4 +1,7 @@
-# Python-Mp3-Player
-python-vlc (3.0.11115)
-mutagen (1.45.1)
-tkinter (0.1.0)
+# **Python-Mp3-Player**
+### Using:
+  1. Media player library (python-vlc)
+  1. GUI library (tkinter)
+  1. Threading (threading)
+  1. Operating system library (os)
+  1. Handling audio metadata (mutagen)
